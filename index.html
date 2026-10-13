@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lady Likes-a-Lot</title>
+<style>
+:root{--bg:#fff;--fg:#262626;--mut:#8e8e8e;--line:#dbdbdb;--acc:#d6246e}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--line:#262626}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+header{display:flex;gap:20px;align-items:center;padding:8px 0 16px}
+.ring{padding:3px;border-radius:50%;background:linear-gradient(45deg,#f9ce34,#ee2a7b,#6228d7);flex:none}
+.ring img{display:block;width:86px;height:86px;border-radius:50%;border:3px solid var(--bg);object-fit:cover}
+h1{font-size:20px;margin:0 0 2px;font-weight:600}
+.nm{font-weight:600;font-size:14px}
+.bio{font-size:14px;line-height:1.35;margin-top:4px}
+.stats{display:flex;gap:22px;margin:14px 0;font-size:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;justify-content:space-around;text-align:center}
+.stats b{display:block;font-size:16px}.stats span{color:var(--mut)}
+.title{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:12px 0 8px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.grid button{padding:0;border:0;background:#222;aspect-ratio:9/16;overflow:hidden;cursor:pointer;position:relative}
+.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;z-index:10;overflow-y:auto}
+.ov.on{display:block}
+.box{max-width:420px;margin:0 auto;padding:10px 10px 24px}
+.top{display:flex;justify-content:space-between;align-items:center;color:#fff;padding:6px 2px}
+.top button,.nav button{background:none;border:0;color:#fff;font-size:26px;cursor:pointer;padding:6px 12px}
+.pic{width:100%;border-radius:12px;display:block;aspect-ratio:9/16;object-fit:cover;background:#111}
+.nav{display:flex;justify-content:space-between;color:#fff;align-items:center}
+.nav small{color:#bbb}
+.panel{background:var(--bg);color:var(--fg);border-radius:12px;margin-top:10px;padding:12px 14px}
+.likes{font-weight:600;font-size:14px;margin-bottom:8px}
+.c{display:flex;gap:10px;margin:10px 0;font-size:14px;line-height:1.35}
+.c img{width:34px;height:34px;border-radius:50%;flex:none}
+.c b{font-weight:600}.c small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+</style></head><body>
+<div class="wrap">
+<header>
+ <div class="ring"><img src="img/a_lady.jpg" alt=""></div>
+ <div><h1>ladylikesalot</h1><div class="nm">Lady Likes-a-Lot 💖</div>
+ <div class="bio">Wellness · padel · rendieren 🦌<br>Mama van Ellie &amp; Joppie<br>Dagelijks vanop het kasteel ✨</div></div>
+</header>
+<div class="stats"><div><b>11</b><span>stories vandaag</span></div><div><b>12,4K</b><span>volgers</span></div><div><b>213</b><span>volgend</span></div></div>
+<div class="title">Stories van vandaag</div>
+<div class="grid" id="grid"></div>
+</div>
+<div class="ov" id="ov"><div class="box">
+ <div class="top"><span id="cnt"></span><button id="x" aria-label="Sluiten">×</button></div>
+ <img class="pic" id="pic" alt="">
+ <div class="nav"><button id="prev" aria-label="Vorige">‹</button><small>veeg of tik op de pijlen</small><button id="next" aria-label="Volgende">›</button></div>
+ <div class="panel"><div class="likes" id="lk"></div><div id="cm"></div></div>
+</div></div>
+<script>
+const D=[{"id": "1041_77pct", "likes": 231, "comments": [{"who": "Oma Rosa", "av": "oma_rosa", "t": "Is dat nu écht die beroemde Rudolph?? Wat een neus!", "ago": "1u"}, {"who": "Marcel de Slager", "av": "marcel_slager", "t": "Mooi beest. Die ligt er warmpjes bij.", "ago": "1u"}, {"who": "Nele de Postbode", "av": "nele_de_postbode", "t": "Ellie en Joppie kijken er heel trots bij 😄", "ago": "55m"}]}, {"id": "0812_93pct", "likes": 187, "comments": [{"who": "Staf van de Hoeve", "av": "staf_van_de_hoeve", "t": "Dat is nog eens een flinke bonk van een rendier.", "ago": "5u"}, {"who": "Greet van de Dorpswinkel", "av": "juffrouw_greet", "t": "Nessa wordt ook elk jaar groter, zeg! 🦌", "ago": "5u"}, {"who": "Juf Els", "av": "juf_els", "t": "Fifi, jij bent altijd vroeg op pad.", "ago": "4u"}]}, {"id": "1152_70pct", "likes": 312, "comments": [{"who": "Marcel de Slager", "av": "marcel_slager", "t": "Wie wint er?", "ago": "2u"}, {"who": "Gust de Bakker", "av": "gust_de_bakker", "t": "De coach staat er toch weer prachtig bij met zijn rug naar de camera 😂", "ago": "2u"}, {"who": "Mevrouw De Wit", "av": "mevrouw_de_wit", "t": "Padel in december, dat is nog eens sportief.", "ago": "1u"}, {"who": "Nele de Postbode", "av": "nele_de_postbode", "t": "Ik zet mijn geld op de man in het groen.", "ago": "1u"}]}, {"id": "0634_99pct", "likes": 205, "comments": [{"who": "Greet van de Dorpswinkel", "av": "juffrouw_greet", "t": "Zo vroeg al aan de yoga? Respect.", "ago": "8u"}, {"who": "Oma Rosa", "av": "oma_rosa", "t": "Dat is een mooie zonsopgang, kind.", "ago": "7u"}, {"who": "Staf van de Hoeve", "av": "staf_van_de_hoeve", "t": "Ik lag toen nog te slapen hoor 😅", "ago": "7u"}]}, {"id": "1236_66pct", "likes": 298, "comments": [{"who": "Juf Els", "av": "juf_els", "t": "Solotraining? Waar is de andere heer gebleven?", "ago": "25m"}, {"who": "Greet van de Dorpswinkel", "av": "juffrouw_greet", "t": "Zijn handdoek en zijn drinkfles liggen er nog, hij komt vast zo terug.", "ago": "22m"}, {"who": "Gust de Bakker", "av": "gust_de_bakker", "t": "Die coach trekt zich er niks van aan, zie ik.", "ago": "20m"}]}, {"id": "0924_86pct", "likes": 264, "comments": [{"who": "Mevrouw De Wit", "av": "mevrouw_de_wit", "t": "Spa-ochtend voor een rendier, dat zie je niet elke dag!", "ago": "4u"}, {"who": "Oma Rosa", "av": "oma_rosa", "t": "Mijn poedel vond vroeger ook alle bubbels geweldig 🛁", "ago": "4u"}, {"who": "Marcel de Slager", "av": "marcel_slager", "t": "Zeg, boek jij mij ook zo een wasbeurt?", "ago": "3u"}]}, {"id": "0821_92pct", "likes": 176, "comments": [{"who": "Gust de Bakker", "av": "gust_de_bakker", "t": "Welke van de twee is nu eigenlijk welke?", "ago": "5u"}, {"who": "Nele de Postbode", "av": "nele_de_postbode", "t": "Haha, ik zou ze zo niet uit elkaar kunnen houden.", "ago": "5u"}, {"who": "Greet van de Dorpswinkel", "av": "juffrouw_greet", "t": "Wat zien die er sportief uit! 💪", "ago": "4u"}, {"who": "Juf Els", "av": "juf_els", "t": "Die sporttassen zien er zwaar uit.", "ago": "4u"}]}, {"id": "1118_72pct", "likes": 342, "comments": [{"who": "Mevrouw De Wit", "av": "mevrouw_de_wit", "t": "Wat een heerlijke dag voor padel inderdaad!", "ago": "2u"}, {"who": "Staf van de Hoeve", "av": "staf_van_de_hoeve", "t": "Dat groene jasje staat hem goed.", "ago": "2u"}, {"who": "Oma Rosa", "av": "oma_rosa", "t": "Doe maar rustig aan, jongens.", "ago": "2u"}]}, {"id": "0708_96pct", "likes": 158, "comments": [{"who": "Marcel de Slager", "av": "marcel_slager", "t": "Een stevig ontbijt voor de trainer, zeker.", "ago": "7u"}, {"who": "Juf Els", "av": "juf_els", "t": "Dat ziet er lekker uit!", "ago": "6u"}, {"who": "Greet van de Dorpswinkel", "av": "juffrouw_greet", "t": "Zalig, een mooie ochtend voor een goed ontbijt ☕", "ago": "6u"}]}, {"id": "1220_68pct", "likes": 289, "comments": [{"who": "Nele de Postbode", "av": "nele_de_postbode", "t": "En ja, die tas… die gaat overal mee 😂", "ago": "1u"}, {"who": "Gust de Bakker", "av": "gust_de_bakker", "t": "Pauze verdiend, heren!", "ago": "1u"}, {"who": "Oma Rosa", "av": "oma_rosa", "t": "Drink maar flink, kinderen.", "ago": "1u"}, {"who": "Mevrouw De Wit", "av": "mevrouw_de_wit", "t": "Die tas is een kunstwerk op zich.", "ago": "55m"}]}, {"id": "1031_79pct", "likes": 301, "comments": [{"who": "Greet van de Dorpswinkel", "av": "juffrouw_greet", "t": "Ellie ziet er stralend uit! Wat een prachtig strikje.", "ago": "4u"}, {"who": "Juf Els", "av": "juf_els", "t": "Fifi Föhn doet wonderen 😍", "ago": "3u"}, {"who": "Staf van de Hoeve", "av": "staf_van_de_hoeve", "t": "Mijn koe moest ik ook eens laten föhnen.", "ago": "3u"}, {"who": "Oma Rosa", "av": "oma_rosa", "t": "Ze ruikt vast heerlijk!", "ago": "3u"}]}];
+let cur=0;
+const g=document.getElementById('grid'),ov=document.getElementById('ov');
+D.forEach((s,i)=>{const b=document.createElement('button');b.innerHTML='<img loading="lazy" src="img/t_'+s.id+'.jpg" alt="Story">';b.onclick=()=>show(i);g.appendChild(b)});
+function show(i){cur=(i+D.length)%D.length;const s=D[cur];
+ document.getElementById('pic').src='img/s_'+s.id+'.jpg';
+ document.getElementById('cnt').textContent=(cur+1)+' / '+D.length;
+ document.getElementById('lk').textContent='❤ '+s.likes+' likes';
+ document.getElementById('cm').innerHTML=s.comments.map(c=>'<div class="c"><img src="img/a_'+c.av+'.jpg" alt=""><div><b>'+c.who+'</b> '+c.t+'<small>'+c.ago+'</small></div></div>').join('');
+ ov.classList.add('on');ov.scrollTop=0;document.body.style.overflow='hidden'}
+function close(){ov.classList.remove('on');document.body.style.overflow=''}
+document.getElementById('x').onclick=close;
+document.getElementById('prev').onclick=()=>show(cur-1);
+document.getElementById('next').onclick=()=>show(cur+1);
+document.addEventListener('keydown',e=>{if(!ov.classList.contains('on'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')show(cur-1);if(e.key==='ArrowRight')show(cur+1)});
+let x0=null;ov.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+ov.addEventListener('touchend',e=>{if(x0===null)return;const d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>60)show(cur+(d<0?1:-1));x0=null});
+</script></body></html>
