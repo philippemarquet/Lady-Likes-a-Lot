@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Het deegdagboek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--paper:#fbf4e4;--crust:#7a4b2a;--ink:#3a2a1c;--flour:#fffaf0;--soft:#e9dcc2;--err:#a3322a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif;min-height:100vh;
+  background-image:radial-gradient(circle at 20% 10%,rgba(255,255,255,.7) 0 2px,transparent 3px),radial-gradient(circle at 70% 40%,rgba(255,255,255,.6) 0 1.5px,transparent 2.5px);background-size:140px 140px,190px 190px}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+.k{font-size:12px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--crust);text-align:center;margin:6px 0 0}
+h1{font:700 44px/1.1 Caveat,cursive;text-align:center;margin:6px 0 4px;color:var(--ink)}
+.sub{text-align:center;margin:0 auto;max-width:34ch;color:#6b5641}
+.jar{display:block;margin:6px auto 0;width:120px;height:auto}
+form{display:flex;gap:8px;max-width:360px;margin:22px auto 0}
+input{flex:1;min-width:0;font:600 18px Inter,sans-serif;padding:12px 14px;border:2px solid var(--crust);border-radius:10px;background:var(--flour);color:var(--ink)}
+button{font:600 16px Inter,sans-serif;padding:12px 18px;border:0;border-radius:10px;background:var(--crust);color:var(--flour);cursor:pointer}
+input:focus-visible,button:focus-visible{outline:3px solid #d9a35b;outline-offset:2px}
+.msg{min-height:1.5em;text-align:center;margin:12px 0 0;font-weight:500;color:var(--err)}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.roll{display:grid;gap:18px;margin-top:26px}
+figure{margin:0;background:var(--flour);padding:10px 10px 6px;border-radius:6px;box-shadow:0 2px 10px rgba(58,42,28,.12);transform:rotate(var(--r))}
+figure img{width:100%;height:auto;display:block;border-radius:3px;cursor:zoom-in}
+figcaption{font:700 22px Caveat,cursive;color:var(--crust);text-align:center;padding-top:4px}
+.big{position:fixed;inset:0;background:rgba(30,20,12,.88);display:none;align-items:center;justify-content:center;padding:12px;z-index:5}
+.big.on{display:flex}.big img{max-width:100%;max-height:100%;border-radius:4px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <svg class="jar" viewBox="0 0 120 130" aria-hidden="true">
+    <path d="M30 34h60v10c8 6 12 16 12 30v34c0 10-8 18-18 18H36c-10 0-18-8-18-18V74c0-14 4-24 12-30z" fill="#fffaf0" stroke="#7a4b2a" stroke-width="4"/>
+    <path d="M22 86c10-8 22-10 38-10s28 2 38 10v22c0 9-7 16-16 16H38c-9 0-16-7-16-16z" fill="#efe0bf"/>
+    <path d="M26 30c8-10 22-14 34-14s26 4 34 14l-4 8H30z" fill="#c9553f"/><circle cx="40" cy="25" r="2.4" fill="#fbf4e4"/><circle cx="58" cy="21" r="2.4" fill="#fbf4e4"/><circle cx="76" cy="25" r="2.4" fill="#fbf4e4"/>
+    <circle cx="48" cy="68" r="3.4" fill="#3a2a1c"/><circle cx="72" cy="68" r="3.4" fill="#3a2a1c"/><path d="M50 80q10 8 20 0" fill="none" stroke="#3a2a1c" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="42" cy="77" r="4" fill="#f1b5a0"/><circle cx="78" cy="77" r="4" fill="#f1b5a0"/>
+  </svg>
+  <p class="k">Het Bakhuis</p>
+
+  <section id="dicht">
+    <h1>Hoe heet ik?</h1>
+    <p class="sub">Ik woon in een pot, onder een doek. Wie mijn naam weet, mag in mijn deegdagboek kijken.</p>
+    <form id="f" autocomplete="off">
+      <input id="naam" aria-label="Mijn naam" placeholder="Mijn naam" autocapitalize="off" spellcheck="false">
+      <button type="submit">Open</button>
+    </form>
+    <p class="msg" id="msg" role="status"></p>
+  </section>
+
+  <section id="open" hidden>
+    <h1>Hallo, ik ben Hannelore.</h1>
+    <p class="sub">Dit zijn de foto's van vandaag in Het Bakhuis. Tik op een foto om hem groot te zien.</p>
+    <div class="roll" id="roll"></div>
+  </section>
+</main>
+<div class="big" id="big" role="dialog" aria-label="Foto groot"><img id="bigimg" alt=""></div>
+<script>
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[^a-z]/g,"");
+async function hash(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").slice(0,24)}
+const f=document.getElementById("f"),msg=document.getElementById("msg"),inp=document.getElementById("naam");
+async function open(h){
+  const r=await fetch(h+"/manifest.json",{cache:"no-store"});if(!r.ok)return false;
+  const m=await r.json();const roll=document.getElementById("roll");roll.innerHTML="";
+  m.fotos.forEach((src,i)=>{const fig=document.createElement("figure");fig.style.setProperty("--r",(i%2?.7:-.7)+"deg");
+    const img=document.createElement("img");img.src=h+"/"+src;img.alt="Foto "+(i+1)+" uit Het Bakhuis";img.loading="lazy";
+    img.onclick=()=>{document.getElementById("bigimg").src=img.src;document.getElementById("big").classList.add("on")};
+    const c=document.createElement("figcaption");c.textContent="Foto "+(i+1);fig.append(img,c);roll.append(fig)});
+  document.getElementById("dicht").hidden=true;document.getElementById("open").hidden=false;return true}
+f.addEventListener("submit",async e=>{e.preventDefault();const n=norm(inp.value);if(!n){msg.textContent="Zeg eens iets.";return}
+  const ok=await open(await hash(n));
+  if(ok){try{sessionStorage.setItem("deeg",await hash(n))}catch(_){}}
+  else{msg.textContent="Zo heet ik niet. Kijk nog eens rond in Het Bakhuis.";inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake")}});
+document.getElementById("big").onclick=()=>document.getElementById("big").classList.remove("on");
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("big").classList.remove("on")});
+try{const s=sessionStorage.getItem("deeg");if(s)open(s)}catch(_){}
+</script>
+</body>
+</html>
