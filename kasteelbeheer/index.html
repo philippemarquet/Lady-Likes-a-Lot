@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Kasteelbeheer"><meta name="theme-color" content="#0f1916"></head><body>
+<title>Kasteelbeheer</title>
+<style>
+/* Layout: één scherm-app voor iPad. Inlogkaart in het midden, daarna één lange logtabel met vaste kop. Bewust één donkere look (kasteel bij nacht, messing beslag). */
+:root {
+  --ink: #0f1916;
+  --panel: #16231f;
+  --panel-2: #1c2c27;
+  --line: #2a3d36;
+  --text: #ebe6d8;
+  --muted: #93a098;
+  --brass: #c9a35c;
+  --brass-dim: #8a7240;
+  --error: #e08a76;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { min-height: 100%; box-sizing: border-box; padding-inline: 20px; padding-block: 0; }
+
+/* Inlogscherm */
+#login { min-height: 100%; display: flex; align-items: center; justify-content: center; padding-block: 48px; box-sizing: border-box; }
+.card {
+  width: 100%; max-width: 420px; box-sizing: border-box;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+  padding: 40px 32px 32px; display: flex; flex-direction: column; gap: 22px; align-items: stretch;
+}
+.crest { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.crest svg { width: 56px; height: 56px; }
+.crest h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; }
+.crest p { margin: 0; color: var(--muted); font-size: 15px; }
+form { display: flex; flex-direction: column; gap: 12px; }
+label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+input {
+  font: inherit; font-size: 22px; letter-spacing: 0.12em; text-transform: uppercase; text-align: center;
+  background: var(--ink); color: var(--text); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; outline: none; width: 100%; box-sizing: border-box;
+}
+input:focus { border-color: var(--brass); box-shadow: 0 0 0 3px rgba(201,163,92,0.25); }
+button {
+  font: inherit; font-size: 18px; font-weight: 600; border: 0; border-radius: 12px; cursor: pointer;
+  background: var(--brass); color: #1a140a; padding: 15px 16px; min-height: 52px;
+}
+button:focus-visible, .logout:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.error { min-height: 22px; margin: 0; color: var(--error); font-size: 15px; text-align: center; }
+.hint { margin: 0; text-align: center; color: var(--muted); font-size: 15px; font-style: italic; }
+.shake { animation: shake 0.4s; }
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+/* Logboek */
+#log { max-width: 820px; margin: 0 auto; padding-block: 28px 48px; }
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.top h1 { margin: 0; font-size: 26px; font-weight: 600; }
+.top p { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+.logout {
+  background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 15px; font-weight: 500;
+  padding: 10px 16px; min-height: 44px;
+}
+.btns { display: flex; gap: 10px; }
+.notice { margin: 0 0 14px; color: var(--muted); font-size: 15px; }
+.notice strong { color: var(--text); font-weight: 600; }
+.admin { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 14px; gap: 10px; }
+.adminrow { display: flex; gap: 10px; }
+.adminrow input { font-size: 18px; padding: 12px 14px; }
+.adminrow button { white-space: nowrap; padding-inline: 20px; }
+td.c .blur { filter: blur(6px); -webkit-filter: blur(6px); user-select: none; -webkit-user-select: none; letter-spacing: 0.04em; }
+td.c .auto { color: var(--muted); font-style: italic; }
+th .lock { display: inline-block; width: 13px; height: 13px; vertical-align: -1px; margin-left: 6px; }
+.table-box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+thead th {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 1;
+  background: var(--panel-2); color: var(--muted);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-align: left;
+  padding: 14px 18px; border-bottom: 1px solid var(--line);
+}
+tbody td { padding: 12px 18px; border-bottom: 1px solid var(--line); font-size: 18px; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.018); }
+td.t { font-family: var(--mono); font-size: 17px; color: var(--text); }
+td.s, td.c { color: var(--text); }
+.act { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 600; }
+.act svg { width: 20px; height: 20px; flex: none; }
+.act.open { color: #5fc27e; }
+.act.dicht { color: #e2705d; }
+@media (max-width: 520px) {
+  thead th, tbody td { padding-inline: 10px; }
+  tbody td { font-size: 16px; }
+  td.t { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+</style>
+
+<div class="wrap">
+  <section id="login">
+    <div class="card" id="card">
+      <div class="crest">
+        <svg viewBox="0 0 56 56" aria-hidden="true">
+          <path d="M28 3 L50 12 V27 C50 40 40.5 49.5 28 53 C15.5 49.5 6 40 6 27 V12 Z" fill="none" stroke="#c9a35c" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="28" cy="24" r="6" fill="#c9a35c"/>
+          <path d="M25 28 L23.5 39 H32.5 L31 28 Z" fill="#c9a35c"/>
+        </svg>
+        <h1>Kasteelbeheer</h1>
+        <p>Toegang tot de sloten van het kasteel</p>
+      </div>
+      <form id="form" autocomplete="off">
+        <label for="code">Inlogcode</label>
+        <input id="code" name="code" type="text" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go">
+        <p class="error" id="error" role="alert"></p>
+        <button type="submit">Inloggen</button>
+      </form>
+      <p class="hint">Inlogcode vergeten? Dat wordt puzzelen..</p>
+    </div>
+  </section>
+
+  <section id="log" hidden>
+    <div class="top">
+      <div>
+        <h1>Activiteitenlog</h1>
+        <p>Export tot 14:00</p>
+      </div>
+      <div class="btns">
+        <button class="logout" id="adminbtn" type="button">Beheerder</button>
+        <button class="logout" id="logout" type="button">Uitloggen</button>
+      </div>
+    </div>
+    <p class="notice"><strong>Automatisch vergrendelen staat aan.</strong> Een slot dat open blijft staan, gaat na 60 minuten vanzelf op slot.</p>
+    <form class="admin" id="adminform" autocomplete="off" hidden>
+      <label for="admincode"><svg viewBox="0 0 20 20" aria-hidden="true" style="width:18px;height:18px;vertical-align:-3px;margin-right:8px;color:#5fc27e"><rect x="3.5" y="9" width="13" height="9" rx="2" fill="currentColor"/><path d="M6.5 9 V6 a3.5 3.5 0 0 1 6.8 -1.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Beheerderswachtwoord</label>
+      <div class="adminrow">
+        <input id="admincode" name="admincode" type="text" autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go">
+        <button type="submit">Ontgrendel</button>
+      </div>
+      <p class="error" id="adminerror" role="alert"></p>
+    </form>
+    <p class="notice" id="codenote">De kolom Code is alleen zichtbaar voor de beheerder.</p>
+    <div class="table-box">
+      <table>
+        <thead><tr><th scope="col">Tijd</th><th scope="col">Slot</th><th scope="col">Code<span id="thlock"></span></th><th scope="col">Actie</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+// Het inlogwoord uit het kruiswoord (hoofdletters en spaties maken niet uit).
+const INLOGWOORD = "KERSTMUTS";
+
+// [tijd, slot, code, actie]  actie: 1 = open, 0 = dicht
+const LOG = [
+  ["07:27:02", 2, "604", 1],
+  ["07:27:58", 2, "604", 0],
+  ["07:30:50", 1, "838", 1],
+  ["07:30:56", 1, "838", 0],
+  ["07:32:15", 3, "838", 1],
+  ["07:32:22", 3, "838", 0],
+  ["07:53:30", 1, "587", 1],
+  ["07:53:36", 1, "587", 0],
+  ["07:55:08", 2, "587", 1],
+  ["07:59:41", 2, "587", 0],
+  ["08:01:55", 1, "587", 1],
+  ["08:02:02", 1, "587", 0],
+  ["08:05:50", 1, "203", 1],
+  ["08:05:57", 1, "203", 0],
+  ["08:13:06", 2, "203", 1],
+  ["08:14:52", 2, "203", 0],
+  ["08:24:03", 5, "587", 1],
+  ["08:24:09", 5, "587", 0],
+  ["08:37:20", 2, "604", 1],
+  ["08:38:31", 2, "604", 0],
+  ["08:40:20", 4, "691", 1],
+  ["08:40:26", 4, "691", 0],
+  ["08:40:58", 3, "203", 1],
+  ["08:41:07", 3, "203", 0],
+  ["08:44:20", 3, "838", 1],
+  ["08:44:27", 3, "838", 0],
+  ["08:45:12", 4, "203", 1],
+  ["08:45:20", 4, "203", 0],
+  ["08:52:16", 5, "587", 1],
+  ["08:52:21", 5, "587", 0],
+  ["09:04:37", 4, "691", 1],
+  ["09:04:44", 4, "691", 0],
+  ["09:06:18", 2, "838", 1],
+  ["09:07:10", 2, "838", 0],
+  ["09:10:02", 4, "203", 1],
+  ["09:10:11", 4, "203", 0],
+  ["09:12:48", 3, "203", 1],
+  ["09:12:57", 3, "203", 0],
+  ["09:16:20", 2, "203", 1],
+  ["09:17:55", 2, "203", 0],
+  ["09:22:10", 1, "203", 1],
+  ["09:22:17", 1, "203", 0],
+  ["09:26:41", 1, "914", 1],
+  ["09:26:47", 1, "914", 0],
+  ["09:31:20", 5, "587", 1],
+  ["09:31:26", 5, "587", 0],
+  ["10:12:05", 5, "587", 1],
+  ["10:12:11", 5, "587", 0],
+  ["10:16:40", 2, "492", 1],
+  ["10:18:15", 2, "492", 0],
+  ["10:41:06", 2, "838", 1],
+  ["10:42:19", 2, "838", 0],
+  ["10:46:09", 2, "120", 1],
+  ["10:47:21", 2, "120", 0],
+  ["10:52:44", 1, "120", 1],
+  ["10:52:50", 1, "120", 0],
+  ["11:08:30", 5, "587", 1],
+  ["11:08:36", 5, "587", 0],
+  ["11:24:05", 1, "914", 1],
+  ["11:24:12", 1, "914", 0],
+  ["11:41:50", 5, "587", 1],
+  ["11:41:56", 5, "587", 0],
+  ["11:51:18", 1, "914", 1],
+  ["11:51:25", 1, "914", 0],
+  ["12:05:33", 5, "203", 1],
+  ["12:05:40", 5, "203", 0],
+  ["12:22:47", 2, "661", 1],
+  ["12:27:10", 5, "587", 1],
+  ["12:27:16", 5, "587", 0],
+  ["12:38:02", 1, "914", 1],
+  ["12:38:09", 1, "914", 0],
+  ["12:58:14", 3, "661", 1],
+  ["12:58:20", 3, "661", 0],
+  ["13:06:40", 5, "587", 1],
+  ["13:06:46", 5, "587", 0],
+  ["13:09:20", 4, "661", 1],
+  ["13:09:26", 4, "661", 0],
+  ["13:22:47", 2, "AUTO", 0],
+  ["13:24:30", 1, "838", 1],
+  ["13:24:37", 1, "838", 0],
+  ["13:31:35", 4, "661", 1],
+  ["13:31:41", 4, "661", 0],
+  ["13:36:10", 3, "661", 1],
+  ["13:36:16", 3, "661", 0],
+  ["13:44:10", 5, "587", 1],
+  ["13:44:16", 5, "587", 0],
+  ["13:52:05", 1, "914", 1],
+  ["13:52:12", 1, "914", 0]
+];
+
+const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, "").toUpperCase();
+const ICON_OPEN = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="9" width="13" height="9" rx="2" fill="currentColor"/><path d="M6.5 9 V6 a3.5 3.5 0 0 1 6.8 -1.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_DICHT = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="9" width="13" height="9" rx="2" fill="currentColor"/><path d="M6.5 9 V6 a3.5 3.5 0 0 1 7 0 V9" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+
+// Tweede wachtwoord: maakt de kolom Code zichtbaar. TIJDELIJK, wordt vervangen zodra de puzzel ervoor vaststaat.
+const BEHEERDERSWOORD = "KERSTLIEDJES";
+let beheerder = false;
+const rows = document.getElementById("rows");
+// Zonder beheerder staan er geen echte codes in de pagina: alleen vervaagde nepcijfers.
+const nep = (i) => String(100 + ((i * 793 + 421) % 900));
+function teken() {
+  rows.innerHTML = LOG.map(([t, s, c, a], i) => {
+    const code = beheerder ? (c === "AUTO" ? '<span class="auto">automatisch</span>' : c) : '<span class="blur" aria-label="verborgen">' + nep(i) + '</span>';
+    return '<tr><td class="t">' + t + '</td><td class="s">' + s + '</td><td class="c">' + code +
+      '</td><td><span class="act ' + (a ? "open" : "dicht") + '" aria-label="' + (a ? "1, open" : "0, dicht") + '">' + a + (a ? ICON_OPEN : ICON_DICHT) + '</span></td></tr>';
+  }).join("");
+  document.getElementById("codenote").hidden = beheerder;
+  document.getElementById("adminbtn").hidden = beheerder;
+  document.getElementById("thlock").innerHTML = beheerder ? "" : '<svg class="lock" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="9" width="13" height="9" rx="2" fill="currentColor"/><path d="M6.5 9 V6 a3.5 3.5 0 0 1 7 0 V9" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+}
+teken();
+const adminform = document.getElementById("adminform");
+const admincode = document.getElementById("admincode");
+const adminerror = document.getElementById("adminerror");
+document.getElementById("adminbtn").addEventListener("click", () => { adminform.hidden = !adminform.hidden; if (!adminform.hidden) admincode.focus(); });
+adminform.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (norm(admincode.value) === norm(BEHEERDERSWOORD)) {
+    beheerder = true; adminerror.textContent = ""; admincode.value = ""; admincode.blur(); adminform.hidden = true; teken();
+  } else {
+    adminerror.textContent = "Onjuist beheerderswachtwoord.";
+    adminform.classList.remove("shake"); void adminform.offsetWidth; adminform.classList.add("shake");
+    admincode.select();
+  }
+});
+
+const form = document.getElementById("form");
+const input = document.getElementById("code");
+const error = document.getElementById("error");
+const card = document.getElementById("card");
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (norm(input.value) === norm(INLOGWOORD)) {
+    error.textContent = "";
+    input.blur();
+    document.getElementById("login").hidden = true;
+    document.getElementById("log").hidden = false;
+    window.scrollTo(0, 0);
+  } else {
+    error.textContent = "Onjuiste inlogcode. Probeer het opnieuw.";
+    card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+    input.select();
+  }
+});
+document.getElementById("logout").addEventListener("click", () => {
+  input.value = ""; beheerder = false; adminform.hidden = true; admincode.value = ""; adminerror.textContent = ""; teken();
+  document.getElementById("log").hidden = true;
+  document.getElementById("login").hidden = false;
+  window.scrollTo(0, 0);
+});
+</script>
+
+</body></html>
