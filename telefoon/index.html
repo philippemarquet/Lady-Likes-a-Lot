@@ -318,10 +318,6 @@ document.querySelectorAll("#pad .k").forEach(b=>b.addEventListener("click",()=>{
  if(typed.length>=4)return;typed+=b.dataset.k;dots();
  if(typed.length===4)setTimeout(()=>{if(typed===CODE){LOCK.hidden=true;typed="";dots()}
   else{PD.classList.remove("shake");void PD.offsetWidth;PD.classList.add("shake");setTimeout(()=>{typed="";dots()},400)}},120)}));
-document.addEventListener("visibilitychange",()=>{if(document.hidden)lockNow()});
-window.addEventListener("pagehide",lockNow);
-let idle=Date.now();["touchstart","click"].forEach(ev=>document.addEventListener(ev,()=>{idle=Date.now()},{passive:true,capture:true}));
-setInterval(()=>{if(LOCK.hidden&&Date.now()-idle>90000&&audio.paused)lockNow()},5000);
 
 </script>
 </body></html>
